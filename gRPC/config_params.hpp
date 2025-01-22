@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include "nlohmann/json.hpp"
 
 #ifndef CONFIG_PARAMS_H
 #define CONFIG_PARAMS_H
@@ -87,5 +88,16 @@ struct Config {
     std::string gpu_hw_acceleration; //intel, nvidia, none
     int logging_level;
 };
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(FrameRate, numerator, denominator)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Video, frame_width, frame_height, frame_rate, pixel_format, video_type)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Audio, channels, sample_rate, format, packet_time)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(File, path, filename)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ST2110, network_interface, local_ip, remote_ip, transport, remote_port, payload_type)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(MCM, conn_type, transport, transport_pixel_format, ip, port, urn)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Payload, type, video, audio)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(StreamType, type, file, st2110, mcm)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Stream, payload, stream_type)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Config, senders, receivers, function, gpu_hw_acceleration, logging_level)
 
 #endif // CONFIG_PARAMS_H

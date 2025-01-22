@@ -56,13 +56,54 @@ void fill_conf_sender(Config &config) {
 }
 
 int main(int argc, char* argv[]) {
-        Config conf;
-        fill_conf_sender(conf);
+    std::string ffmpeg_pipeline_reference;
+    std::string ffmpeg_pipeline_modified;
 
-    auto aaa = commitConfigs(conf);
 
-    Config recv = stringPairsToConfig(aaa);
-    
+    Config config_refrence;
+    fill_conf_sender(config_refrence);
+
+    if(ffmpeg_generate_pipeline(config_refrence, ffmpeg_pipeline_reference) != 0) {
+        std::cout << "Error generating reference pipeline" << std::endl;
+        return 1;
+    }
+
+    // Serialize form Config to json aka. single large string
+    nlohmann::json config_json = config_refrence;
+    //Dump json to string
+    std::string config_json_str_send = config_json.dump();
+
+    //DUMMY SEND TO gRPC
+
+    //memcopy
+    std::string config_json_str_recv = config_json_str_send;
+    // Deserialize from string to json
+    try {
+        nlohmann::json config_json_recv = nlohmann::json::parse(config_json_str_recv);
+        // Deserialize from json to Config
+        Config config_mod = config_json_recv.get<Config>();
+        if (ffmpeg_generate_pipeline(config_mod, ffmpeg_pipeline_modified) != 0) {
+            std::cout << "Error generating modified pipeline" << std::endl;
+            return 1;
+        }
+    }
+    catch (const nlohmann::json::parse_error &e) {
+        std::cerr << "JSON parse error: " << e.what() << std::endl;
+    }
+    catch (const nlohmann::json::type_error &e) {
+        std::cerr << "JSON type error: " << e.what() << std::endl;
+    }
+    catch (const std::exception &e) {
+        std::cerr << "Exception: " << e.what() << std::endl;
+    }
+
+    if(ffmpeg_pipeline_reference != ffmpeg_pipeline_modified) {
+        std::cout << "Error: pipelines do not match" << std::endl;
+        return 1;
+    }else{
+        std::cout << "Pipelines match" << std::endl;
+    }
+
     // if (argc != 5) {
     //     std::cout << "client sample app requires the following arguments: 1) interface, 2) port, 3) source_ip, 4) destination_port" << std::endl;
     //     return 1;
