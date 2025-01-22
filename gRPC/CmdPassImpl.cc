@@ -1,4 +1,5 @@
 #include "ffmpeg_pipeline_generator.hpp"
+#include "config_serialize_deserialize.hpp"
 #include <sstream>
 #include "CmdPassImpl.h"
 
@@ -182,7 +183,12 @@ static Config stringPairsToConfig(const std::vector<std::pair<std::string, std::
     Config config;
 
     for (const auto& pair : pairs) {
-        if (pair.first == "function") {
+        if (pair.first == "json") {
+            if(deserialize_config_json(config, pair.second) != 0) {
+                std::cout << "Error deserializing Config from json" << std::endl;
+            }
+            break;
+        } else if (pair.first == "function") {
             config.function = pair.second;
         } else if (pair.first == "gpu_hw_acceleration") {
             config.gpu_hw_acceleration = pair.second;

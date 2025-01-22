@@ -7,6 +7,7 @@
 #include "config_params.hpp"
 #include "FFmpeg_wrapper_client.h"
 #include "build/ffmpeg_cmd_wrap.pb.h"
+#include "config_serialize_deserialize.hpp"
 #include <sstream>
 #include <utility>
 #include <string>
@@ -194,17 +195,24 @@ static void streamToStringPairs(const Stream& stream,
 std::vector<std::pair<std::string, std::string>> commitConfigs(const Config& config) {
     std::vector<std::pair<std::string, std::string>> result;
 
-    result.push_back({"function", config.function});
-    result.push_back({"gpu_hw_acceleration", config.gpu_hw_acceleration});
-    result.push_back({"logging_level", std::to_string(config.logging_level)});
+    std::string json_str;
+    if(serialize_config_json(config, json_str) != 0) {
+        std::cout << "Error serializing Config" << std::endl;
+    };
+    
+    result.push_back({"json", json_str});
 
-	for (const auto& sender : config.senders) {
-        streamToStringPairs(sender, result);
-    }
+    // result.push_back({"function", config.function});
+    // result.push_back({"gpu_hw_acceleration", config.gpu_hw_acceleration});
+    // result.push_back({"logging_level", std::to_string(config.logging_level)});
 
-    for (const auto& receiver : config.receivers) {
-        streamToStringPairs(receiver, result);
-    }
+	// for (const auto& sender : config.senders) {
+    //     streamToStringPairs(sender, result);
+    // }
+
+    // for (const auto& receiver : config.receivers) {
+    //     streamToStringPairs(receiver, result);
+    // }
 
 	return result;
 }
