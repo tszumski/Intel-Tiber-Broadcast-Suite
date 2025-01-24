@@ -92,6 +92,57 @@ void fill_conf_receiver(Config &config)
     }
 }
 
+void fill_conf_sender_multiviewer(Config &config) {
+    config.function = "multiviewer";
+    config.gpu_hw_acceleration = "intel";
+    config.logging_level = 0;
+
+    Payload p;
+    p.type = payload_type::video;
+    p.video.frame_width = 1920;
+    p.video.frame_height = 1080;
+    p.video.frame_rate = {30, 1};
+    p.video.pixel_format = "yuv422p10le";
+    p.video.video_type = "rawvideo";
+
+    {
+        Stream s;
+
+        s.payload = p;
+        s.stream_type.type = stream_type::file;
+        s.stream_type.file.path = "/videos";
+        s.stream_type.file.filename = "1920x1080p10le_1.yuv";
+        config.receivers.push_back(s);
+
+        s.stream_type.file.path = "/videos";
+        s.stream_type.file.filename = "1920x1080p10le_2.yuv";
+        config.receivers.push_back(s);
+
+        s.stream_type.file.filename = "1920x1080p10le_1.yuv";
+        config.receivers.push_back(s);
+        s.stream_type.file.filename = "1920x1080p10le_2.yuv";
+        config.receivers.push_back(s);
+        s.stream_type.file.filename = "1920x1080p10le_1.yuv";
+        config.receivers.push_back(s);
+        s.stream_type.file.filename = "1920x1080p10le_2.yuv";
+        config.receivers.push_back(s);
+        s.stream_type.file.filename = "1920x1080p10le_1.yuv";
+        config.receivers.push_back(s);
+        // s.stream_type.file.filename = "1920x1080p10le_2.yuv";
+        // config.receivers.push_back(s);
+    }
+
+    {
+        Stream s;
+
+        s.payload = p;
+        s.stream_type.type = stream_type::file;
+        s.stream_type.file.path = "/videos/recv";
+        s.stream_type.file.filename = "1920x1080p10le_1.yuv";
+        config.senders.push_back(s);
+    }
+}
+
 int main(int argc, char *argv[]) {
     //sender
     {
@@ -122,6 +173,23 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         std::cout << "Generated receiver pipeline: " << std::endl
+                  << pipelinie_string << std::endl;
+    }
+
+    std::cout <<std::endl;
+    //multiviewer
+    {
+        Config conf;
+        fill_conf_sender_multiviewer(conf);
+
+        std::string pipelinie_string;
+
+        if (ffmpeg_generate_pipeline(conf, pipelinie_string) != 0) {
+            pipelinie_string.clear();
+            std::cout << "Error generating pipeline" << std::endl;
+            return 1;
+        }
+        std::cout << "Generated multiviewer pipeline: " << std::endl
                   << pipelinie_string << std::endl;
     }
 }
